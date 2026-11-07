@@ -2,12 +2,12 @@ import sys
 import subprocess
 import streamlit as st
 
-st.set_page_config(layout="wide", page_title="LMS Moodle")
+st.set_page_config(layout="wide", page_title="LMS Moodle", page_icon="sage.png")
 
-st.caption("Личный кабинет / Мои курсы / Информатика / Практикум / Задание 1")
+st.caption("Личный кабинет / Мои курсы / Информатика 10 класс / Практикум / Задание 1")
 st.divider()
 
-col_moodle, col_empty = st.columns([2.3, 0.1], gap="large")
+col_moodle, col_assistant = st.columns([2.3, 1.0], gap="large")
 
 with col_moodle:
     col_status, col_task = st.columns([1, 4])
@@ -67,4 +67,37 @@ with col_moodle:
             st.error("Тест 1 провален: Превышено время ожидания (возможно, бесконечный цикл)")
 
 
-# ================================================================================================
+            
+import sage
+
+SAGE = "sage.jpg"
+
+with col_assistant:
+    with st.container(border=True):
+        st.image(SAGE, width=45)
+        st.header("Мудрец")
+
+        chat_box = st.container(height=400)
+
+        if "messages" not in st.session_state:
+            st.session_state.messages = []
+
+        with chat_box:
+            for msg in st.session_state.messages:
+                with st.chat_message(msg["role"], avatar=SAGE if msg["role"] == "assistant" else None):
+                    st.markdown(msg["content"])
+
+        user_query = st.chat_input("Задай вопрос Мудрецу...")
+
+        if user_query:
+            st.session_state.messages.append({"role": "user", "content": user_query})
+            with chat_box:
+                with st.chat_message("user"):
+                    st.markdown(user_query)
+
+            answer = sage.get_sage_response(task_text, user_query, st.session_state.messages, student_code)
+
+            st.session_state.messages.append({"role": "assistant", "content": answer})
+            with chat_box:
+                with st.chat_message("assistant", avatar=SAGE):
+                    st.markdown(answer)
